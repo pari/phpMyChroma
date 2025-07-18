@@ -26,6 +26,14 @@ docker compose up
 Open http://localhost:8080 in your browser 
 
 
+-----
+
+[![](./screenshots/Screenshot_Collections_thumb.png)](https://github.com/pari/phpMyChroma/blob/main/screenshots/Screenshot_Collections.png?raw=true)
+[![](./screenshots/Screenshot_Databases_thumb.png)](https://github.com/pari/phpMyChroma/blob/main/screenshots/Screenshot_Databases.png?raw=true)
+[![](./screenshots/Screenshot_ListDocuments_thumb.png)](https://github.com/pari/phpMyChroma/blob/main/screenshots/Screenshot_ListDocuments.png?raw=true)
+[![](./screenshots/Screenshot_SemanticSearch_thumb.png)](https://github.com/pari/phpMyChroma/blob/main/screenshots/Screenshot_SemanticSearch.png?raw=true)
+
+
 ## 🛡 License
 
 This project is licensed under the terms of the `MIT` license. See LICENSE for more details.
