@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  phpmychroma:
+    image: centerlimit/phpmychroma:v0.1
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - PHP_INI_SCAN_DIR=/usr/local/etc/php/conf.d
+    volumes:
+      - .:/var/www
