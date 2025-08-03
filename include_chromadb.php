@@ -108,15 +108,6 @@ class ChromaDBClient {
         return json_decode($response, true);
     }
 
-    /**
-     * List all available tenants
-     * Currently returns hardcoded default tenant
-     * @return array List of tenant objects
-     */
-    public function listTenants() {
-        return [ ["name" => "default_tenant"] ];
-        //return $this->makeRequest('/tenants');
-    }
 
     /**
      * List all databases within a tenant

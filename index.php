@@ -77,7 +77,7 @@ if (isset($_SESSION['chroma_connection'])) {
         $chromaClient = new ChromaDBClient(
             $conn['base_url'],
             $conn['api_key'],
-            $_GET['tenant'] ?? 'default_tenant',
+            $conn['tenant'] ?? $_GET['tenant'] ?? 'default_tenant',
             $_GET['db'] ?? 'default_database'
         );
         // Initialize OpenAI client for embedding generation
@@ -103,12 +103,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new Exception("ChromaDB server is not responding at $base_url. Please check the server is running and the URL is correct.");
                 }
                 
+                // Validate tenant by trying to list databases
+                $tenant = $_POST['tenant'];
+                try {
+                    $testClient = new ChromaDBClient($base_url, $_POST['api_key'], $tenant, 'default_database');
+                    $testClient->listDatabases($tenant);
+                } catch (Exception $e) {
+                    throw new Exception("Invalid tenant '$tenant' or unable to access it: " . $e->getMessage());
+                }
+                
                 // Store connection details in session
                 $_SESSION['chroma_connection'] = [
                     'base_url' => $base_url,
-                    'api_key' => $_POST['api_key']
+                    'api_key' => $_POST['api_key'],
+                    'tenant' => $tenant
                 ];
-                header("Location: index.php?action=list_tenants");
+                header("Location: index.php?action=list_databases&tenant=" . urlencode($tenant));
                 exit();
 
             case 'create_collection':
@@ -230,7 +240,7 @@ function page_header($title) {
     // Build breadcrumb navigation
     $breadcrumbs = '';
     
-    if ($tenant) $breadcrumbs .= " &gt; <a href='index.php?action=list_tenants'>Tenants</a> &gt; <a href='index.php?action=list_databases&tenant=$tenant'>$tenant</a>";
+    if ($tenant) $breadcrumbs .= " &gt; <a href='index.php?action=list_databases&tenant=$tenant'>$tenant</a>";
     if ($db) $breadcrumbs .= " &gt; <a href='index.php?action=list_collections&tenant=$tenant&db=$db'>$db</a>";
     if ($collection) $breadcrumbs .= " &gt; $collection";
     
@@ -298,7 +308,7 @@ function page_header($title) {
         <div class="container">
             <div class="nav">
                 PHPMyChroma
-                <span class="logout">$disconnect_link v 0.1</span>
+                <span class="logout">$disconnect_link v 0.2</span>
                 <hr>
                 $breadcrumbs
             </div>
@@ -343,17 +353,6 @@ $_SESSION['HTTP_REFERER'] = $_SERVER['REQUEST_URI'];
 // Route to appropriate view based on action
 switch ($action) {
     
-    case 'list_tenants':
-        // Display available tenants
-        page_header("Tenants");
-        $tenants = $chromaClient->listTenants();
-        echo "<table><tr><th>Tenant Name</th><th>Action</th></tr>";
-        foreach ($tenants as $tenant) {
-            $name = htmlspecialchars($tenant['name']);
-            echo "<tr><td>$name</td><td><a href='?action=list_databases&tenant=$name'>Select</a></td></tr>";
-        }
-        echo "</table>";
-        break;
 
     case 'list_databases':
         // Display databases in current tenant with create/delete options
@@ -646,6 +645,9 @@ switch ($action) {
                 
                 <label for="port">Port:</label><br>
                 <input type="number" id="port" name="port" value="8000" autocomplete="off" required><br>
+                
+                <label for="tenant">Tenant Name:</label><br>
+                <input type="text" id="tenant" name="tenant" value="default_tenant" autocomplete="off" required><br>
                 
                 <label for="api_key">API Key (optional):</label><br>
                 <input type="password" id="api_key" name="api_key" autocomplete="off"><br>
